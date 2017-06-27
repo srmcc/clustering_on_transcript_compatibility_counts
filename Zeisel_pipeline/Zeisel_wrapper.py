@@ -123,5 +123,8 @@ for index in RANGE:
     TCC_dist_flname=TCC_dist_base_flname+sampling_suffix[index]+".dat"
     TCC_distance_flname=TCC_distance_base_flname+sampling_suffix[index]+".dat"
     print('Getting  pairwise distances for '+sampling_rates[index]+' fraction of reads...')
-    os.system('python get_pairwise_distances.py '+TCC_dist_flname+' '+TCC_distance_flname+' '+str(num_proc))
+    if not os.path.exists(TCC_distance_flname):
+        os.system('python get_pairwise_distances.py '+TCC_dist_flname+' '+TCC_distance_flname+' '+str(num_proc))
+    else:
+        print('TCC distances already generated')
 
