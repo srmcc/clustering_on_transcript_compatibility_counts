@@ -42,14 +42,14 @@ if (not SRA_dir) or (not kallipso_path) or (not ref_transcriptome):
 if not os.path.exists(SRA_dir):
     os.system('python '+dir_path+'get_files.py')
 
-if not os.path.exists('./reads_with_UMIs/'):
+if not os.path.exists(dir_path+'reads_with_UMIs/'):
     print('Extracting reads from SRAs...')
-    os.system('mkdir -p ./reads_with_UMIs/')
-    os.system('rm -f ./reads_with_UMIs/*')
-    os.system('python '+dir_path+'process_SRA.py -i '+SRA_dir+' -o ./reads_with_UMIs/ -n '+str(num_proc))
+    os.system('mkdir -p ' + dir_path+'reads_with_UMIs/')
+    os.system('rm -f ' + dir_path+'reads_with_UMIs/*')
+    os.system('python '+dir_path+'process_SRA.py -i '+SRA_dir+' -o ' + dir_path+'reads_with_UMIs/ -n '+str(num_proc))
 else:
     print('Reads already extracted from SRAs')
-read_dir_base='./reads_and_UMI_subsample'
+read_dir_base= dir_path+'reads_and_UMI_subsample'
 
 
 sampling_suffix=['100']
@@ -62,12 +62,12 @@ read_dir_to_pass=read_dir_base+sampling_suffix_ref+"/"
 if not os.path.exists(read_dir_to_pass):
     print('Separating reads and UMIs...')
     os.system('mkdir -p '+read_dir_to_pass)
-    os.system('mkdir -p ./tmp_dir/')
+    os.system('mkdir -p ' +dir_path+'tmp_dir/')
     os.system('rm -f '+ read_dir_to_pass+'*')
-    os.system('rm -f ./tmp_dir/*')
-    os.system('python '+dir_path+'Clean_reads.py -i ./reads_with_UMIs/ -o '+read_dir_to_pass+' '+
-              '-t ./tmp_dir/ -n '+str(num_proc))
-    os.system('rmdir ./tmp_dir')
+    os.system('rm -f ' +dir_path+'tmp_dir/*')
+    os.system('python '+dir_path+'Clean_reads.py -i ' +dir_path+'reads_with_UMIs/ -o '+read_dir_to_pass+' '+
+              '-t ' +dir_path+'tmp_dir/ -n '+str(num_proc))
+    os.system('rmdir ' +dir_path+'tmp_dir')
 else:
     print("Reads and UMIs already separated")
 
@@ -85,20 +85,20 @@ for index in RANGES:
     
 
 print('Generating the Kallisto index (with hacked kallisto)...')
-index_path='./kallisto_index/Zeisel_index.idx'
-if not os.path.exists('./kallisto_index'):
-    os.system('mkdir -p ./kallisto_index')
-    os.system('rm -f ./kallisto_index/*')
+index_path=dir_path+'kallisto_index/Zeisel_index.idx'
+if not os.path.exists(dir_path+'kallisto_index'):
+    os.system('mkdir -p ' +dir_path+'kallisto_index')
+    os.system('rm -f ' +dir_path+'kallisto_index/*')
     os.system(kallipso_path+' index -i '+index_path+' '+ref_transcriptome)
     metadata_cmd=kallipso_path+' metadata '+index_path
     os.system(metadata_cmd)
 else:
     print("Kallisto already indexed")
-num_ec = sum(1 for line in open('./kallisto_index/Zeisel_index.idx_ecmap.txt'))
+num_ec = sum(1 for line in open(dir_path+'kallisto_index/Zeisel_index.idx_ecmap.txt'))
 print(num_ec)
 
 print('Generating TCC (with hacked kallisto)...')
-TCC_base_dir='./transcript_compatibility_counts_subsample'
+TCC_base_dir=dir_path+'transcript_compatibility_counts_subsample'
 for index in RANGE:
     print('Running hacked kallisto on '+sampling_rates[index]+' fraction of reads...')
     TCC_dir=TCC_base_dir+sampling_suffix[index]+"/"
@@ -111,8 +111,8 @@ for index in RANGE:
         print("already generated TCC")
 
 print('Generating TCC distribution...')
-TCC_dist_base_flname='./Zeisel_TCC_distribution_subsample'
-TCC_base_flname='./Zeisel_TCC_subsample'
+TCC_dist_base_flname=dir_path+'Zeisel_TCC_distribution_subsample'
+TCC_base_flname=dir_path+'Zeisel_TCC_subsample'
 for index in RANGE:
     print('Getting the TCC dist for '+sampling_rates[index]+' fraction of reads...')
     TCC_dir=TCC_base_dir+sampling_suffix[index]+"/"
