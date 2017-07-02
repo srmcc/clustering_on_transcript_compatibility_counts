@@ -9,6 +9,9 @@ import os
 import getopt
 import sys
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = dir_path +'/'
+
 try:
     opts, args = getopt.getopt(sys.argv[1:],"i:n:k:t:",["idir=","njobs=","hacked-kallisto-path=","reference-transcriptome="])
 except getopt.GetoptError:
@@ -36,11 +39,14 @@ if (not SRA_dir) or (not kallipso_path) or (not ref_transcriptome):
     print ('usage is : \n python Zeisel_wrapper.py -i input_SRA_dir -k path-to-hacked-kallisto -t path-to-mouse-reference-transcriptome [-n number-of-processes-to-use]')
     sys.exit(1)
 
+if not os.path.exists(SRA_dir):
+    os.system('python '+dir_path+'get_files.py')
+
 if not os.path.exists('./reads_with_UMIs/'):
     print('Extracting reads from SRAs...')
     os.system('mkdir -p ./reads_with_UMIs/')
     os.system('rm -f ./reads_with_UMIs/*')
-    os.system('python process_SRA.py -i '+SRA_dir+' -o ./reads_with_UMIs/ -n '+str(num_proc))
+    os.system('python '+dir_path+'process_SRA.py -i '+SRA_dir+' -o ./reads_with_UMIs/ -n '+str(num_proc))
 else:
     print('Reads already extracted from SRAs')
 read_dir_base='./reads_and_UMI_subsample'
@@ -59,7 +65,7 @@ if not os.path.exists(read_dir_to_pass):
     os.system('mkdir -p ./tmp_dir/')
     os.system('rm -f '+ read_dir_to_pass+'*')
     os.system('rm -f ./tmp_dir/*')
-    os.system('python Clean_reads.py -i ./reads_with_UMIs/ -o '+read_dir_to_pass+' '+
+    os.system('python '+dir_path+'Clean_reads.py -i ./reads_with_UMIs/ -o '+read_dir_to_pass+' '+
               '-t ./tmp_dir/ -n '+str(num_proc))
     os.system('rmdir ./tmp_dir')
 else:
@@ -74,7 +80,7 @@ for index in RANGES:
     out_dir_to_pass=read_dir_base+sampling_suffix[index]+"/"
     os.system('mkdir -p '+out_dir_to_pass)
     os.system('rm -f '+out_dir_to_pass+'*')
-    cmd='python sample_reads.py -i '+read_dir_to_pass+' -o '+out_dir_to_pass+' -k 100 -r '+sampling_rates[index]+' -n '+str(num_proc)
+    cmd='python '+dir_path+'sample_reads.py -i '+read_dir_to_pass+' -o '+out_dir_to_pass+' -k 100 -r '+sampling_rates[index]+' -n '+str(num_proc)
     os.system(cmd)
     
 
@@ -100,7 +106,7 @@ for index in RANGE:
     if not os.path.exists(TCC_dir):
         os.system('mkdir -p '+TCC_dir)
         os.system('rm -f '+TCC_dir+'*')
-        os.system('python get_pseudoalignments.py -i '+read_dir_to_pass+' -o '+TCC_dir+' -k '+kallipso_path+ ' -t '+ index_path +' -n '+ str(num_proc))
+        os.system('python '+dir_path+'get_pseudoalignments.py -i '+read_dir_to_pass+' -o '+TCC_dir+' -k '+kallipso_path+ ' -t '+ index_path +' -n '+ str(num_proc))
     else:
         print("already generated TCC")
 
@@ -113,7 +119,7 @@ for index in RANGE:
     TCC_dist_flname=TCC_dist_base_flname+sampling_suffix[index]+".dat"
     TCC_flname=TCC_base_flname+sampling_suffix[index]+".dat"
     if not os.path.exists(TCC_dist_flname):
-        os.system('python get_tcc_dist.py -i '+TCC_dir+' -m '+str(num_ec)+' -t '+TCC_flname+' -d '+ TCC_dist_flname)
+        os.system('python '+dir_path+'get_tcc_dist.py -i '+TCC_dir+' -m '+str(num_ec)+' -t '+TCC_flname+' -d '+ TCC_dist_flname)
     else:
         print('TCC distribution already generated')
 
@@ -124,7 +130,7 @@ for index in RANGE:
     TCC_distance_flname=TCC_distance_base_flname+sampling_suffix[index]+".dat"
     print('Getting  pairwise distances for '+sampling_rates[index]+' fraction of reads...')
     if not os.path.exists(TCC_distance_flname):
-        os.system('python get_pairwise_distances.py '+TCC_dist_flname+' '+TCC_distance_flname+' '+str(num_proc))
+        os.system('python '+dir_path+'get_pairwise_distances.py '+TCC_dist_flname+' '+TCC_distance_flname+' '+str(num_proc))
     else:
         print('TCC distances already generated')
 
