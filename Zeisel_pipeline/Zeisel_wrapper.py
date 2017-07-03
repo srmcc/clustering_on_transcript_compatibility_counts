@@ -132,7 +132,7 @@ for index in RANGE:
             for line in infile:
                 line=line.replace('\n', '')
                 splits= line.split('\t')
-                eq_dict[splits[0]]=splits[1]
+                eq_dict[int(splits[0])]=splits[1]
 
         with open(dir_path +'eq_dict.dat', 'wb') as outfile:
             pickle.dump(eq_dict, outfile)
