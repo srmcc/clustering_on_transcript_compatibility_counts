@@ -109,6 +109,23 @@ for index in RANGE:
         os.system('python '+dir_path+'get_pseudoalignments.py -i '+read_dir_to_pass+' -o '+TCC_dir+' -k '+kallipso_path+ ' -t '+ index_path +' -n '+ str(num_proc))
     else:
         print("already generated TCC")
+    ## making a dictionary of equivlance class index to transcript index  
+    if not os.path.exists(dir_path +'eq_dict.dat'):
+        eq_dict={}
+        flnames=sorted([x for x in os.listdir(TCC_dir) if x.endswith('.class')])
+        eq_class_hash=sum(1 for line in open(dir_path+'kallisto_index/Zeisel_index.idx_ecmap.txt'))
+        for flname in flnames:
+            with open(TCC_dir+flname) as flptr:
+                for line in flptr:
+                    line = line.strip()
+                    vect = line.split()
+                    if not vect[0].isdigit():
+                        if vect[0] not in eq_dict:
+                            eq_dict[vect[0]]=eq_class_hash
+                            eq_class_hash+=1
+
+        with open(dir_path +'eq_dict.dat', 'wb') as outfile:
+            pickle.dump(eq_dict, outfile, pickle.HIGHEST_PROTOCOL)
 
 print('Generating TCC distribution...')
 TCC_dist_base_flname=dir_path+'Zeisel_TCC_distribution_subsample'
