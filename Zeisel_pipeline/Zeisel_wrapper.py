@@ -8,6 +8,7 @@
 import os
 import getopt
 import sys
+import pickle
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 dir_path = dir_path +'/'
