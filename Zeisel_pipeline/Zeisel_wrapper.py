@@ -112,7 +112,7 @@ for index in RANGE:
         print("already generated TCC")
     ## making a dictionary of equivlance class index to transcript index  
     if not os.path.exists(dir_path +'eq_dict.dat'):
-        eq_dict={}
+        eq_dict_inv={}
         flnames=sorted([x for x in os.listdir(TCC_dir) if x.endswith('.class')])
         eq_class_hash=sum(1 for line in open(dir_path+'kallisto_index/Zeisel_index.idx_ecmap.txt'))
         for flname in flnames:
@@ -121,12 +121,21 @@ for index in RANGE:
                     line = line.strip()
                     vect = line.split()
                     if not vect[0].isdigit():
-                        if vect[0] not in eq_dict:
-                            eq_dict[vect[0]]=eq_class_hash
+                        if vect[0] not in eq_dict_inv:
+                            eq_dict_inv[vect[0]]=eq_class_hash
                             eq_class_hash+=1
+        eq_dict={}
+        for key in eq_dict_inv:
+            eq_dict[eq_dict_inv[key]]=key
+
+        with open(dir_path+'kallisto_index/Zeisel_index.idx_ecmap.txt') as infile:
+            for line in infile:
+                line=line.replace('\n', '')
+                splits= line.split('\t')
+                eq_dict[splits[0]]=splits[1]
 
         with open(dir_path +'eq_dict.dat', 'wb') as outfile:
-            pickle.dump(eq_dict, outfile, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(eq_dict, outfile)
 
 print('Generating TCC distribution...')
 TCC_dist_base_flname=dir_path+'Zeisel_TCC_distribution_subsample'
